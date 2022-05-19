@@ -35,7 +35,27 @@ bool srv_buffer_pool_in_core_file = TRUE;
   }
 ```
 
-##### 参考
+###### 补充说明
+MySQL和InnoDB之间有个接口层(handler/ha_innodb.cc), 这里面定义了存储引擎层的选项buffer_pool_in_core_file与MySQL层是如何对应、以及沟通（注释，验证，更新）的.
+MYSQL_SYSVAR_BOOL是一个宏。对应参数，以及变量只要实现该宏的“参数”。
+
+对应信息如下，通过innodb_srv_buffer_pool_in_core_file_update更改srv_buffer_pool_in_core_file的值。
+```
+static MYSQL_SYSVAR_BOOL(
+    buffer_pool_in_core_file, srv_buffer_pool_in_core_file, PLUGIN_VAR_NOCMDARG,
+    "This option has no effect if @@core_file is OFF. "
+    "If @@core_file is ON, and this option is OFF, then the core dump file will"
+    " be generated only if it is possible to exclude buffer pool from it. "
+    "As soon as it will be determined that such exclusion is impossible a "
+    "warning will be emitted and @@core_file will be set to OFF to prevent "
+    "generating a core dump. "
+    "If this option is enabled (which is the default), then core dumping "
+    "logic will not be affected. ",
+    nullptr, innodb_srv_buffer_pool_in_core_file_update, TRUE);
+```
+
+
+###### 参考
 
 1. https://man7.org/linux/man-pages/man2/madvise.2.html
 2. https://dev.mysql.com/doc/refman/8.0/en/innodb-buffer-pool-in-core-file.html
